@@ -5,6 +5,7 @@ Discovery board from [STMicroelectronics](http://www.st.com/). STM32F429 MCU
 offers the performance of ARM Cortex M4 core (with floating point unit) running
 at 180 MHz while reaching reasonably lower static power consumption.
 
+Mostly scripts from [jserv's repo](https://github.com/jserv/stm32f429-linux-builder.git).
 
 Prerequisites
 =============
@@ -41,10 +42,39 @@ Build Instructions
 ==================
 * Simply execute ``make``, and it will fetch and build u-boot, linux kernel, and busybox from scratch:
 ```
-	git submoudle init
-	git submodule update
+    git submoudle init
+    git submodule update
     make
 ```
+If you use ubuntu 16.06+, you may got the following error:
+```
+Can't use 'defined(@array)' (Maybe you should just omit the defined()?) at $HOME/rtos/uclinux-stm32f4/uclinux/kernel/timeconst.pl line 373.
+$HOME/rtos/uclinux-stm32f4/uclinux/kernel/Makefile:133: recipe for target 'kernel/timeconst.h' failed
+
+```
+Just patch it:
+```
+diff --git a/kernel/timeconst.pl b/kernel/timeconst.pl
+index eb51d76..bdd3464 100644
+--- a/kernel/timeconst.pl
++++ b/kernel/timeconst.pl
+@@ -370,9 +370,10 @@ if ($hz eq '--can') {
+        }
+ 
+        @val = @{$canned_values{$hz}};
+-       if (!defined(@val)) {
+-               @val = compute_values($hz);
+-       }
++       @val = compute_values($hz);
++       # if (!defined(@val)) {
++       #       @val = compute_values($hz);
++       # }
+        output($hz, @val);
+ }
+ exit 0;
+
+```
+
 * Once STM32F429 Discovery board is properly connected via USB wire to Linux host, you can execute ``make install`` to flash the device. Note: you have to ensure the installation of the latest OpenOCD in advance.
 ```
     make install
